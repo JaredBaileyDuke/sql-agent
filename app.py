@@ -10,7 +10,7 @@ if "master_agent" not in st.session_state:
 if "pending_input" not in st.session_state:
     st.session_state.pending_input = None
 
-st.title("Watson Civil Database Chatbot")
+st.title("Civil Eng Database Chatbot")
 
 def add_message(content, is_user=False):
     """Append a message to the session state."""
