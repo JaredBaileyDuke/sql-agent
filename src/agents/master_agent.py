@@ -35,18 +35,16 @@ class MasterAgent:
             raise ValueError("Please set the OPENAI_API_KEY environment variable in your .env file.")
         
         self.llm = OpenAI(api_key=openai_api_key, temperature=0, verbose=verbose)
+        # Initialize flag to track if SQLAgent has been called
+        self.sql_called = False
         
         # Import subordinate agents.
         from src.agents import search_tool
         # from src.agents import fdot_bot_agent  # FDOT Bot is commented out for now.
-        # from src.agents import sql_agent, graph_agent  # SQL and Graph agents are commented out for now.
+        # Uncomment SQLAgent and GraphAgent as needed.
+        # from src.agents import sql_agent, graph_agent  # Uncomment if used.
         
         self.tools = [
-            # Tool(
-            #     name="FDOT Bot",
-            #     func=fdot_bot_agent.run,
-            #     description="The OpenAI FDOT Bot for FDOT-specific queries."
-            # ),
             Tool(
                 name="InternetSearch",
                 func=search_tool.run,
@@ -59,8 +57,8 @@ class MasterAgent:
             # ),
             # Tool(
             #     name="GraphAgent",
-            #     func=graph_agent.run,
-            #     description="Generates graphs based on provided numerical data."
+            #     func=self._run_graph_agent,
+            #     description="Generates graphs based on provided numerical data. (Available after SQLAgent is used.)"
             # ),
             Tool(
                 name="Text Agent",
@@ -69,19 +67,27 @@ class MasterAgent:
             )
         ]
         
-        # You can restrict the allowed tools if desired:
+        # Allow all the tools we just defined.
         self.agent = initialize_agent(
             tools=self.tools,
             llm=self.llm,
             agent="zero-shot-react-description",
             verbose=verbose,
-            allowed_tools=["InternetSearch", "Text Agent"]
+            allowed_tools=["InternetSearch", "SQLAgent", "GraphAgent", "Text Agent"]
         )
 
-    # Helper function for SQLAgent, commented out for now.
-    # def _run_sql_agent(self, query: str) -> str:
-    #     from src.agents import sql_agent
-    #     return sql_agent.run(query, self.llm)
+    def _run_sql_agent(self, query: str) -> str:
+        # Mark that SQLAgent has been run.
+        self.sql_called = True
+        from src.agents import sql_agent
+        return sql_agent.run(query, self.llm)
+
+    def _run_graph_agent(self, query: str) -> str:
+        # Only allow GraphAgent if SQLAgent has been called.
+        if not self.sql_called:
+            return "Graph Agent unavailable. Please run SQL Agent first."
+        from src.agents import graph_agent
+        return graph_agent.run(query)
 
     def text_agent(self, input_text: str) -> str:
         return f"Text Agent processed: {input_text}"
