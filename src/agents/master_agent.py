@@ -19,7 +19,6 @@ class ChainOfThoughtHandler(BaseCallbackHandler):
         self.tools_used = set()
 
     def on_agent_action(self, action, **kwargs):
-        # Log the tool usage with input.
         self.chain.append(f"Using tool: {action.tool} with input: {action.tool_input}")
         self.tools_used.add(action.tool)
 
@@ -31,25 +30,38 @@ class ChainOfThoughtHandler(BaseCallbackHandler):
 
 class MasterAgent:
     def __init__(self, verbose: bool = False):
-        # Retrieve OpenAI API key from the environment.
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if not openai_api_key:
             raise ValueError("Please set the OPENAI_API_KEY environment variable in your .env file.")
         
-        # Initialize the base language model.
         self.llm = OpenAI(api_key=openai_api_key, temperature=0, verbose=verbose)
         
         # Import subordinate agents.
         from src.agents import search_tool
-        # from src.agents import sql_agent, graph_agent  # Commented out for now
+        # from src.agents import fdot_bot_agent  # FDOT Bot is commented out for now.
+        # from src.agents import sql_agent, graph_agent  # SQL and Graph agents are commented out for now.
         
-        # Define the list of tools the master agent can use.
         self.tools = [
+            # Tool(
+            #     name="FDOT Bot",
+            #     func=fdot_bot_agent.run,
+            #     description="The OpenAI FDOT Bot for FDOT-specific queries."
+            # ),
             Tool(
                 name="InternetSearch",
-                func=search_tool.run,  # Assumes search_tool.py exports a run(query: str) -> str function.
+                func=search_tool.run,
                 description="Performs an internet search if the answer isn’t in the database."
             ),
+            # Tool(
+            #     name="SQLAgent",
+            #     func=self._run_sql_agent,
+            #     description="Queries the FDOT SQL database for relevant information."
+            # ),
+            # Tool(
+            #     name="GraphAgent",
+            #     func=graph_agent.run,
+            #     description="Generates graphs based on provided numerical data."
+            # ),
             Tool(
                 name="Text Agent",
                 func=self.text_agent,
@@ -57,29 +69,27 @@ class MasterAgent:
             )
         ]
         
-        # Initialize the master agent using a zero-shot-react description approach.
+        # You can restrict the allowed tools if desired:
         self.agent = initialize_agent(
             tools=self.tools,
             llm=self.llm,
             agent="zero-shot-react-description",
-            verbose=verbose
+            verbose=verbose,
+            allowed_tools=["InternetSearch", "Text Agent"]
         )
 
+    # Helper function for SQLAgent, commented out for now.
+    # def _run_sql_agent(self, query: str) -> str:
+    #     from src.agents import sql_agent
+    #     return sql_agent.run(query, self.llm)
+
     def text_agent(self, input_text: str) -> str:
-        """A simple tool that echoes back the provided input."""
         return f"Text Agent processed: {input_text}"
 
     def run(self, prompt: str) -> str:
-        """
-        Run the master agent with the provided prompt.
-        Returns the final answer along with a formatted chain-of-thought (CoT)
-        and a list of all tools used.
-        """
-        # Capture intermediate steps.
         cot_handler = ChainOfThoughtHandler()
         result = self.agent.run(prompt, callbacks=[cot_handler])
         
-        # Format each line of the chain-of-thought.
         formatted_lines = []
         for line in cot_handler.chain:
             if line.startswith("Using tool:"):
@@ -109,9 +119,8 @@ class MasterAgent:
         )
         return final_output
 
-# For testing the module independently.
 if __name__ == "__main__":
     master_agent = MasterAgent(verbose=True)
-    test_prompt = "Test"
+    test_prompt = "How many r's are in strawberry?"
     response = master_agent.run(test_prompt)
     print("Response:", response)
