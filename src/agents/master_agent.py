@@ -45,21 +45,26 @@ class MasterAgent:
         # from src.agents import sql_agent, graph_agent  # Uncomment if used.
         
         self.tools = [
-            Tool(
-                name="InternetSearch",
-                func=search_tool.run,
-                description="Performs an internet search if the answer isn’t in the database."
-            ),
+            # Tool(
+            #     name="InternetSearch",
+            #     func=search_tool.run,
+            #     description="Performs an internet search if the answer isn’t in the database."
+            # ),
             # Tool(
             #     name="SQLAgent",
             #     func=self._run_sql_agent,
             #     description="Queries the FDOT SQL database for relevant information."
             # ),
-            # Tool(
-            #     name="GraphAgent",
-            #     func=self._run_graph_agent,
-            #     description="Generates graphs based on provided numerical data. (Available after SQLAgent is used.)"
-            # ),
+            Tool(
+                name="GraphAgent",
+                func=self._run_graph_agent,
+                description="Generates graphs based on provided numerical data. (Available after SQLAgent is used.)"
+            ),
+            Tool(
+                name="PandasAgent",
+                func=self._run_pandas_agent,
+                description="Performs analysis on CSV data using a Pandas DataFrame."
+            ),
             Tool(
                 name="Text Agent",
                 func=self.text_agent,
@@ -73,28 +78,45 @@ class MasterAgent:
             llm=self.llm,
             agent="zero-shot-react-description",
             verbose=verbose,
-            allowed_tools=["InternetSearch", "SQLAgent", "GraphAgent", "Text Agent"]
+            allowed_tools=["InternetSearch", "SQLAgent", "GraphAgent", "PandasAgent", "Text Agent"]
         )
-
+    
     def _run_sql_agent(self, query: str) -> str:
         # Mark that SQLAgent has been run.
         self.sql_called = True
         from src.agents import sql_agent
         return sql_agent.run(query, self.llm)
-
+        
+    def _run_pandas_agent(self, query: str) -> str:
+        from src.agents import pandas_agent
+        return pandas_agent.run(query, self.llm)
+    
     def _run_graph_agent(self, query: str) -> str:
         # Only allow GraphAgent if SQLAgent has been called.
         if not self.sql_called:
             return "Graph Agent unavailable. Please run SQL Agent first."
         from src.agents import graph_agent
         return graph_agent.run(query)
-
+    
     def text_agent(self, input_text: str) -> str:
         return f"Text Agent processed: {input_text}"
-
+    
     def run(self, prompt: str) -> str:
+        # Attempt to open and read the DATABASE.md document for context.
+        try:
+            with open("./src/data/CSV.md", "r") as file:
+                database_doc = file.read()
+        except Exception as e:
+            database_doc = ""
+        
+        # Prepend the database documentation to the user prompt.
+        prompt_with_doc = (
+            f"Please refer to the following database documentation to help determine "
+            f"if the SQLAgent should be used:\n\n{database_doc}\n\nUser Query:\n{prompt}"
+        )
+        
         cot_handler = ChainOfThoughtHandler()
-        result = self.agent.run(prompt, callbacks=[cot_handler])
+        result = self.agent.run(prompt_with_doc, callbacks=[cot_handler])
         
         formatted_lines = []
         for line in cot_handler.chain:

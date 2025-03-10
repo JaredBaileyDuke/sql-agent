@@ -1,3 +1,10 @@
+# Data
+fdot_database.db
+CombinedContracts.db
+DedupeContract_202502192343.csv
+CSV.md 
+DATABASE.md
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

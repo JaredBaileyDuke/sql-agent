@@ -22,7 +22,7 @@ python3 -m venv venv
 
 #### Windows
 ```bash
-venv\Scripts\activate
+source venv/Scripts/activate
 ```
 
 #### Mac/Linux
@@ -48,6 +48,20 @@ SERPAPI_API_KEY=your_serpapi_api_key_here
 - SERPAPI_API_KEY: API key for SerpAPI (if using for internet searches).
 
 ## Running the Application
+
+### Start the virtual environment (if not already started):
+
+#### Windows
+```bash
+source venv/Scripts/activate
+```
+
+#### Mac/Linux
+```bash
+source venv/bin/activate
+```
+
+### Start the app
 After configuration, you can run the application using Streamlit:
 
 ```bash
