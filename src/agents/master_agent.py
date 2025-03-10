@@ -50,21 +50,21 @@ class MasterAgent:
             #     func=search_tool.run,
             #     description="Performs an internet search if the answer isn’t in the database."
             # ),
-            # Tool(
-            #     name="SQLAgent",
-            #     func=self._run_sql_agent,
-            #     description="Queries the FDOT SQL database for relevant information."
-            # ),
+            Tool(
+                name="SQLAgent",
+                func=self._run_sql_agent,
+                description="Queries the SQL database for relevant information."
+            ),
             Tool(
                 name="GraphAgent",
                 func=self._run_graph_agent,
                 description="Generates graphs based on provided numerical data. (Available after SQLAgent is used.)"
             ),
-            Tool(
-                name="PandasAgent",
-                func=self._run_pandas_agent,
-                description="Performs analysis on CSV data using a Pandas DataFrame."
-            ),
+            # Tool(
+            #     name="PandasAgent",
+            #     func=self._run_pandas_agent,
+            #     description="Performs analysis on CSV data using a Pandas DataFrame."
+            # ),
             Tool(
                 name="Text Agent",
                 func=self.text_agent,
@@ -78,7 +78,13 @@ class MasterAgent:
             llm=self.llm,
             agent="zero-shot-react-description",
             verbose=verbose,
-            allowed_tools=["InternetSearch", "SQLAgent", "GraphAgent", "PandasAgent", "Text Agent"]
+            allowed_tools=[
+                # "InternetSearch", 
+                "SQLAgent", 
+                "GraphAgent", 
+                # "PandasAgent", 
+                "Text Agent"
+                ]
         )
     
     def _run_sql_agent(self, query: str) -> str:
@@ -104,7 +110,7 @@ class MasterAgent:
     def run(self, prompt: str) -> str:
         # Attempt to open and read the DATABASE.md document for context.
         try:
-            with open("./src/data/CSV.md", "r") as file:
+            with open("./src/data/sqlite/DATABASE.md", "r") as file:
                 database_doc = file.read()
         except Exception as e:
             database_doc = ""
