@@ -1,28 +1,43 @@
 import streamlit as st
-from st_chat_message import message
+import time
 
-# Initialize session state to store messages
+# Initialize session state for storing messages
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 st.title("Watson Civil Database Chatbot")
 
 def add_message(content, is_user=False):
+    """Append a message to the session state."""
     st.session_state.messages.append({"content": content, "is_user": is_user})
 
-# Render the chat messages using st-chat-message with unique keys
-for i, msg in enumerate(st.session_state.messages):
-    message(msg["content"], is_user=msg["is_user"], key=f"msg_{i}")
+# Display chat messages from session state with custom avatars
+for msg in st.session_state.messages:
+    avatar = "👷" if msg["is_user"] else "🧠"
+    with st.chat_message("user" if msg["is_user"] else "assistant", avatar=avatar):
+        st.markdown(msg["content"])
 
-# Sidebar input area
-with st.sidebar:
-    st.header("User Input")
-    user_input = st.text_input("Type your message:", key="user_input")
-    if st.button("Send", key="send_btn"):
-        if user_input:
-            # Append the user's message
-            add_message(user_input, is_user=True)
-            # Bot response (for now, echoing back the user's message)
-            bot_reply = f"Bot says: {user_input}"
-            add_message(bot_reply, is_user=False)
-            st.rerun()  # Corrected function to rerun the script
+# Chat input field at the bottom
+user_input = st.chat_input("Type your message...")
+
+if user_input:
+    # Append user message
+    add_message(user_input, is_user=True)
+    
+    # Simulated bot reply
+    reply_text = f"Bot says: {user_input}"
+    
+    # Stream the bot reply character-by-character
+    with st.chat_message("assistant", avatar="🧠"):
+        placeholder = st.empty()
+        streamed_text = ""
+        for char in reply_text:
+            streamed_text += char
+            placeholder.markdown(streamed_text)
+            time.sleep(0.05)  # Adjust the speed as needed
+
+    # Once streaming is complete, add the final reply to session state
+    add_message(reply_text, is_user=False)
+    
+    # Rerun the app to update the chat display
+    st.rerun()

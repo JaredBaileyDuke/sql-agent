@@ -19,6 +19,5 @@ SQL chatbot agent for civil engineering data
 # Run on your own
 
 
-# Libraries
-- https://github.com/undo76/st-chat-message
+
 
