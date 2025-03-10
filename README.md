@@ -14,9 +14,13 @@ SQL chatbot agent for civil engineering data
 
 ## Install required packages
 
+## Set .env variables
+
 
 
 # Run on your own
+
+
 
 
 

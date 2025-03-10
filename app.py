@@ -35,7 +35,7 @@ if st.session_state.pending_input:
         for char in response_text:
             streamed_text += char
             placeholder.markdown(streamed_text)
-            time.sleep(0.05)  # Adjust the speed as desired
+            time.sleep(0.01)  # Adjust the speed as desired
 
     # Save the complete reply in session state.
     add_message(response_text, is_user=False)
