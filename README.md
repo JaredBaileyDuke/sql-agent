@@ -2,6 +2,10 @@
 
 This project provides a SQL chatbot agent designed to query and analyze civil engineering data. The agent leverages OpenAI, LangChain, and additional tools (like Google Search) to answer queries related to civil engineering construction projects.
 
+![Music Examples](src/images/music-examples.gif)
+
+This project is still evolving for the client in question.
+
 ## Sample Data
 
 As the data for this project is secret, we've provided a sample database to pull from.
@@ -13,7 +17,7 @@ Queries such as the following show the power of this chatbot:
 ### Data Sources
 - Sample sqlite database provided from https://www.sqlitetutorial.net/sqlite-sample-database/
 
-![SQLite Sample Database](src/images/sqlite-sample-database-color.jpeg)
+![SQLite Sample Database](src/images/sqlite-sample-database-color.jpg)
 
 ---
 
