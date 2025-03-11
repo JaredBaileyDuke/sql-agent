@@ -2,16 +2,18 @@
 
 This project provides a SQL chatbot agent designed to query and analyze civil engineering data. The agent leverages OpenAI, LangChain, and additional tools (like Google Search) to answer queries related to civil engineering construction projects.
 
+DUe to the sensitive data in question, this project has public facing and private data. For the public facing side of this project, I am showcasing a sample music database that can be queried. The chatbot converts natural language to SQL, and returns to the user the expected answer and the thinking + code that was used to arrive there.
+
 ![Music Examples](src/images/music-example.gif)
 
 This project is still evolving for the client in question.
 
 ## Sample Data
 
-As the data for this project is secret, we've provided a sample database to pull from.
+As mentioned above, the data for this project is secret and I've provided a sample database to pull from.
 
 Queries such as the following show the power of this chatbot:
-- How many customers purchase AC/DC albums?
+- How many customers purchased AC/DC albums?
 - Which employee (first and last name) sold the most albums, and how many were sold?
 
 ### Data Sources
